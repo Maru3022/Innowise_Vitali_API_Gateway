@@ -1,0 +1,34 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service-public
+          uri: ${AUTH_SERVICE_URL:http://auth-service:8081}
+          predicates:
+            - Path=/api/v1/auth/login,/api/v1/auth/refresh,/api/v1/auth/logout
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: auth-service
+                fallbackUri: forward:/fallback/auth
+
+        - id: user-service
+          uri: ${USER_SERVICE_URL:http://user-service:8082}
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: user-service
+                fallbackUri: forward:/fallback/user
+
+grpc:
+  client:
+    auth-service:
+      address: 'static://${GRPC_AUTH_HOST:auth-service}:${GRPC_AUTH_PORT:9090}'
+      negotiationType: plaintext
+
+logging:
+  level:
+    com.example.innowise_vitali: ${APP_LOG_LEVEL:INFO}
+    org.springframework.cloud.gateway: ${GATEWAY_LOG_LEVEL:WARN}
