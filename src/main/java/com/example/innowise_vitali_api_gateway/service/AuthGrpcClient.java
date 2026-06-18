@@ -10,11 +10,11 @@ import org.springframework.stereotype.Service;
 public class AuthGrpcClient {
 
     @GrpcClient("auth-service")
-    private AuthGrpcServiceGrpc.AuthGrpcServiceBlockingStub authStub;
+    private com.example.innowise_vitali.auth.grpc.AuthGrpcServiceGrpc.AuthGrpcServiceBlockingStub authStub;
 
-    public ValidateTokenResponse validateToken(String token) {
+    public com.example.innowise_vitali.auth.grpc.ValidateTokenResponse validateToken(String token) {
         try {
-            ValidateTokenRequest request = ValidateTokenRequest.newBuilder()
+            com.example.innowise_vitali.auth.grpc.ValidateTokenRequest request = com.example.innowise_vitali.auth.grpc.ValidateTokenRequest.newBuilder()
                     .setToken(token)
                     .build();
             return authStub.validateToken(request);
