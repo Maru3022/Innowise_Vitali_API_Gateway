@@ -1,4 +1,9 @@
 spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:redis_secret}
   cloud:
     gateway:
       routes:
@@ -21,6 +26,26 @@ spring:
               args:
                 name: user-service
                 fallbackUri: forward:/fallback/user
+
+        - id: order-service
+          uri: ${ORDER_SERVICE_URL:http://order-service:8083}
+          predicates:
+            - Path=/api/v1/orders/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: order-service
+                fallbackUri: forward:/fallback/order
+
+        - id: payment-service
+          uri: ${PAYMENT_SERVICE_URL:http://payment-service:8084}
+          predicates:
+            - Path=/api/v1/payments/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: payment-service
+                fallbackUri: forward:/fallback/payment
 
 grpc:
   client:

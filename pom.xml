@@ -46,6 +46,12 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Redis Reactive (for RequestRateLimiter) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+        </dependency>
+
         <!-- Gateway + WebFlux -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>

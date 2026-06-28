@@ -27,6 +27,18 @@ public class FallbackController {
         return buildFallbackResponse(HttpStatus.SERVICE_UNAVAILABLE, "User service is temporarily unavailable. Please try again later.", exchange);
     }
 
+    @RequestMapping("/fallback/order")
+    public Mono<ResponseEntity<ErrorResponse>> orderFallback(ServerWebExchange exchange) {
+        log.warn("Order service circuit breaker triggered");
+        return buildFallbackResponse(HttpStatus.SERVICE_UNAVAILABLE, "Order service is temporarily unavailable. Please try again later.", exchange);
+    }
+
+    @RequestMapping("/fallback/payment")
+    public Mono<ResponseEntity<ErrorResponse>> paymentFallback(ServerWebExchange exchange) {
+        log.warn("Payment service circuit breaker triggered");
+        return buildFallbackResponse(HttpStatus.SERVICE_UNAVAILABLE, "Payment service is temporarily unavailable. Please try again later.", exchange);
+    }
+
     private Mono<ResponseEntity<ErrorResponse>> buildFallbackResponse(HttpStatus status, String message, ServerWebExchange exchange) {
         return Mono.just(ResponseEntity.status(status).body(
                 ErrorResponse.builder()
