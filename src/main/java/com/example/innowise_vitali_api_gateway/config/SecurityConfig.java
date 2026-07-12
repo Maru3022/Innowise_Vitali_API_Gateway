@@ -15,11 +15,11 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 public class SecurityConfig {
 
     private final JwtAuthGatewayFilter jwtAuthGatewayFilter;
-    private final GatewayProperties gatewayProperties;
+    private final AppGatewayProperties appGatewayProperties;
 
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
-        String[] publicPaths = gatewayProperties.getPublicPaths().toArray(new String[0]);
+        String[] publicPaths = appGatewayProperties.getPublicPaths().toArray(new String[0]);
 
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)

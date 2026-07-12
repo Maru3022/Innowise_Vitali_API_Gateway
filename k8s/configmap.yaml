@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+  namespace: online-store
+data:
+  SPRING_PROFILES_ACTIVE: "docker"
+  AUTH_SERVICE_URL: "http://auth-service:8081"
+  USER_SERVICE_URL: "http://user-service:8082"
+  ORDER_SERVICE_URL: "http://order-service:8083"
+  PAYMENT_SERVICE_URL: "http://payment-service:8084"
+  GRPC_AUTH_HOST: "auth-service"
+  GRPC_AUTH_PORT: "9090"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"

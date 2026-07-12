@@ -1,5 +1,7 @@
-FROM eclipse-temurin:17-jdk-alpine AS builder
+﻿FROM eclipse-temurin:17-jdk-alpine AS builder
 WORKDIR /app
+
+RUN apk add --no-cache gcompat
 
 COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./

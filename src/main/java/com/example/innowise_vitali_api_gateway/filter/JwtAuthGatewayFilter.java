@@ -1,6 +1,6 @@
 package com.example.innowise_vitali_api_gateway.filter;
 
-import com.example.innowise_vitali_api_gateway.config.GatewayProperties;
+import com.example.innowise_vitali_api_gateway.config.AppGatewayProperties;
 import com.example.innowise_vitali_api_gateway.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -27,8 +28,9 @@ import java.util.Map;
 public class JwtAuthGatewayFilter implements WebFilter {
 
     private final JwtService jwtService;
-    private final GatewayProperties gatewayProperties;
+    private final AppGatewayProperties appGatewayProperties;
     private final ObjectMapper objectMapper;
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     private static final String BEARER_PREFIX = "Bearer ";
     private static final String ROLE_PREFIX = "ROLE_";
@@ -87,7 +89,8 @@ public class JwtAuthGatewayFilter implements WebFilter {
     }
 
     private boolean isPublicPath(String path) {
-        return gatewayProperties.getPublicPaths().stream().anyMatch(path::equals);
+        return appGatewayProperties.getPublicPaths().stream()
+                .anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
 
     private Mono<Void> unauthorized(ServerWebExchange exchange, String message) {

@@ -1,0 +1,1 @@
+[{"op":"add","path":"/spec/template/spec/volumes","value":[{"name":"nginx-config","configMap":{"name":"random-api-mock-config"}}]},{"op":"add","path":"/spec/template/spec/containers/0/volumeMounts","value":[{"name":"nginx-config","mountPath":"/etc/nginx/conf.d"}]}]

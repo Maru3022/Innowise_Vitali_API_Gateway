@@ -1,0 +1,1 @@
+[{"op":"add","path":"/spec/template/spec/containers/0/env/-","value":{"name":"INTERNAL_SECRET","valueFrom":{"secretKeyRef":{"name":"order-service-secret","key":"INTERNAL_SECRET"}}}}]

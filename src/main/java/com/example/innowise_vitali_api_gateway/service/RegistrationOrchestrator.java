@@ -56,10 +56,18 @@ public class RegistrationOrchestrator {
                     return callUserService(userRequest)
                             .doOnSuccess(r -> log.info("User service registration succeeded for username={}", request.getUsername()))
                             .onErrorResume(userError -> {
-                                log.error("User service failed for username={}, initiating rollback. Error: {}",
+                                log.warn("User service call failed for username={}, verifying actual state before rollback. Error: {}",
                                         request.getUsername(), userError.getMessage());
-                                return rollbackAuthRegistration(request.getUsername())
-                                        .then(Mono.error(toResponseStatusException(userError, "User service registration failed")));
+                                return verifyUserExists(request.getUsername())
+                                        .flatMap(exists -> {
+                                            if (exists) {
+                                                log.info("User service registration actually succeeded despite error for username={}", request.getUsername());
+                                                return Mono.<Object>just(java.util.Map.of("username", request.getUsername(), "status", "created"));
+                                            }
+                                            log.error("User service registration genuinely failed for username={}, initiating rollback", request.getUsername());
+                                            return rollbackAuthRegistration(request.getUsername())
+                                                    .then(Mono.error(toResponseStatusException(userError, "User service registration failed")));
+                                        });
                             });
                 })
                 .onErrorResume(e -> {
@@ -76,6 +84,7 @@ public class RegistrationOrchestrator {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                         response.bodyToMono(String.class)
+                                .defaultIfEmpty("")
                                 .flatMap(body -> Mono.error(
                                         new ResponseStatusException(response.statusCode(), "Auth service error: " + body)
                                 ))
@@ -86,10 +95,12 @@ public class RegistrationOrchestrator {
     private Mono<Object> callUserService(UserCreateRequest request) {
         return userWebClient.post()
                 .uri("/api/v1/users")
+                .header("X-Internal-Secret", internalSecret)
                 .bodyValue(request)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                         response.bodyToMono(String.class)
+                                .defaultIfEmpty("")
                                 .flatMap(body -> Mono.error(
                                         new ResponseStatusException(response.statusCode(), "User service error: " + body)
                                 ))
@@ -97,6 +108,15 @@ public class RegistrationOrchestrator {
                 .bodyToMono(Object.class);
     }
 
+    private Mono<Boolean> verifyUserExists(String username) {
+        return userWebClient.get()
+                .uri("/api/v1/users/internal/by-username/{username}", username)
+                .header("X-Internal-Secret", internalSecret)
+                .retrieve()
+                .bodyToMono(Object.class)
+                .map(r -> true)
+                .onErrorReturn(false);
+    }
     private Mono<Void> rollbackAuthRegistration(String username) {
         return authWebClient.delete()
                 .uri("/api/v1/auth/internal/rollback/{username}", username)
